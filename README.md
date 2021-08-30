@@ -37,6 +37,6 @@ cdk synth
 cdk deploy
 ```
 
-5. Open the Jupyter Notebook in the **client directory** follow the instructions and execute the query.
+5. Open the Jupyter Notebook in the **jupyter notebook directory** follow the instructions and execute the query.
 
 6. Check the dynamoDB table and S3 bucket
