@@ -1,5 +1,7 @@
 ## Example
-Command Query Response Segregation (CQRS) is a pattern used in microservice architecture when multiple microservices require access to the same data but require it differant shape. The first microservice in this example generates an order, the second microservice produces an account summary and the final micrsoservice stores the account summary makes it available through an the API Gateway
+Command Query Response Segregation (CQRS), is a pattern used in microservice architecture when multiple microservices require access to the same data but each microservice requires the data to be available in a differant shape. 
+
+The first microservice in this example generates an order. The second microservice produces an account summary by aggregating the total of each order filtered by accountpid. The final micrsoservice stores the account summary in an Amazon DynamoDB table and makes it available through the API Gateway.
 
 ![architecture](./images/architecture_1.png "Architecture")
 

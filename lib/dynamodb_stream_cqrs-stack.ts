@@ -19,7 +19,11 @@ export class DynamodbStreamCqrsStack extends cdk.Stack {
     //Create DynamoDB table
     const order_dynamoTable = new Table(this, "OrderDynamoDBTable",{
       partitionKey: {
-        name: 'orderid',
+        name: 'accountid',
+        type: AttributeType.STRING
+      },
+      sortKey: {
+        name: 'vendorid',
         type: AttributeType.STRING
       },
       tableName: 'dynamodb_stream_cqrs_order',
