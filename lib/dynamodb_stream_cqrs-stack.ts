@@ -27,7 +27,8 @@ export class DynamodbStreamCqrsStackPattern1 extends cdk.Stack {
       },
       tableName: 'dynamodb_stream_cqrs_details_pattern_1',
       removalPolicy: cdk.RemovalPolicy.DESTROY,
-      stream: StreamViewType.NEW_IMAGE
+      stream: StreamViewType.NEW_IMAGE,
+      billingMode: BillingMode.PAY_PER_REQUEST
     });
 
     const dynamoTable_summary = new Table(this, "dynamoTable_summary", {
@@ -37,7 +38,10 @@ export class DynamodbStreamCqrsStackPattern1 extends cdk.Stack {
       },
       tableName: 'dynamodb_stream_cqrs_summary_pattern_1',
       removalPolicy: cdk.RemovalPolicy.DESTROY,
-      stream: StreamViewType.NEW_IMAGE
+      stream: StreamViewType.NEW_IMAGE,
+      billingMode: BillingMode.PROVISIONED,
+      readCapacity: 2,
+      writeCapacity: 2,
     });
 
     //IAM roles and policies
@@ -195,7 +199,8 @@ export class DynamodbStreamCqrsStackPattern2 extends cdk.Stack {
       },
       tableName: 'dynamodb_stream_cqrs_details_pattern_2',
       removalPolicy: cdk.RemovalPolicy.DESTROY,
-      stream: StreamViewType.NEW_IMAGE
+      stream: StreamViewType.NEW_IMAGE,
+      billingMode: BillingMode.PAY_PER_REQUEST,
     });
 
     const dynamoTable_summary = new Table(this, "dynamoTable_summary", {
@@ -205,7 +210,10 @@ export class DynamodbStreamCqrsStackPattern2 extends cdk.Stack {
       },
       tableName: 'dynamodb_stream_cqrs_summary_pattern_2',
       removalPolicy: cdk.RemovalPolicy.DESTROY,
-      stream: StreamViewType.NEW_IMAGE
+      stream: StreamViewType.NEW_IMAGE,
+      billingMode: BillingMode.PROVISIONED,
+      readCapacity: 2,
+      writeCapacity: 2,
     });
 
     //SQS queues
