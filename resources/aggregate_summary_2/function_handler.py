@@ -15,13 +15,13 @@ sqs_queue = os.environ.get('SQSQUEUE')
 def lambda_handler(event, context):
     data = json.loads(json.dumps(event))
     for record in data["Records"]:
-        print(record)
+        print(json.dumps(record))
         SendRecord(record["dynamodb"]["NewImage"])
         
 def SendRecord(data):
     try:
-        details = json.loads(json.dumps(data['details']['M']))
-        total = float(details['unitprice']['N']) * float(details['quantity']['N'])
+        # details = json.loads(json.dumps(data['details']['M']))
+        total = float(data['unitprice']['N']) * float(data['quantity']['N'])
         accountid = str(data['accountid']['S'])
         summary=json.dumps({
             "accountid": accountid,
