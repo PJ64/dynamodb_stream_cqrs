@@ -1,7 +1,7 @@
 import * as cdk from '@aws-cdk/core';
 import { AwsIntegration, RestApi, PassthroughBehavior, LogGroupLogDestination, AccessLogFormat, MethodLoggingLevel } from '@aws-cdk/aws-apigateway'
 import { Table, BillingMode, AttributeType, StreamViewType } from '@aws-cdk/aws-dynamodb'
-import { Runtime, Code, Function, StartingPosition } from '@aws-cdk/aws-lambda';
+import { Runtime, Code, Function, StartingPosition, LayerVersion, Tracing, LambdaInsightsVersion } from '@aws-cdk/aws-lambda';
 import { Queue } from '@aws-cdk/aws-sqs';
 import { Role, ServicePrincipal, ManagedPolicy, PolicyStatement } from '@aws-cdk/aws-iam';
 import { DynamoEventSource, SqsEventSource } from '@aws-cdk/aws-lambda-event-sources'
@@ -54,10 +54,20 @@ export class DynamodbStreamCqrsStackPattern1 extends cdk.Stack {
 
     lambda_service_role.addToPolicy(new PolicyStatement({
       resources: [dynamoTable_summary.tableArn],
-      actions: ['dynamodb:PutItem','dynamodb:UpdateItem'],
+      actions: ['dynamodb:PutItem', 'dynamodb:UpdateItem'],
     }));
 
     //Lambda functions
+    //Lambda layer
+    const embeded_metricsLayer = new LayerVersion(this, 'embeded_metricsLayer', {
+      layerVersionName: 'xray_sdk',
+      compatibleRuntimes: [
+        Runtime.PYTHON_3_7
+      ],
+      code: Code.fromAsset('resources/lambda_layer'),
+      description: 'xray_sdk_embeded_metrics',
+    });
+
     const lambda_aggregate = new Function(this, "lambda_aggregate", {
       runtime: Runtime.PYTHON_3_7,
       handler: "function_handler.lambda_handler",
@@ -66,7 +76,10 @@ export class DynamodbStreamCqrsStackPattern1 extends cdk.Stack {
       role: lambda_service_role,
       environment: {
         'TABLENAME': dynamoTable_summary.tableName
-      }
+      },
+      layers: [embeded_metricsLayer],
+      tracing: Tracing.ACTIVE,
+      insightsVersion: LambdaInsightsVersion.VERSION_1_0_98_0
     });
 
     lambda_aggregate.addEventSource(new DynamoEventSource(dynamoTable_details, {
@@ -119,18 +132,18 @@ export class DynamodbStreamCqrsStackPattern1 extends cdk.Stack {
               "city": {
                 "S": "$input.path('$.order.city')"
               },
-              'coffeetype': { 
-                'S': "$input.path('$.order.coffeetype')" 
+              'coffeetype': {
+                'S': "$input.path('$.order.coffeetype')"
               },
-              'coffeesize': { 
-                'S': "$input.path('$.order.coffeesize')" 
+              'coffeesize': {
+                'S': "$input.path('$.order.coffeesize')"
               },
-              'unitprice': { 
+              'unitprice': {
                 'N': "$input.path('$.order.unitprice')"
               },
-              'quantity': { 
+              'quantity': {
                 'N': "$input.path('$.order.quantity')"
-              }              
+              }
             }
           })
         },
@@ -220,7 +233,7 @@ export class DynamodbStreamCqrsStackPattern2 extends cdk.Stack {
     const queue = new Queue(this, "Queue", {
       queueName: "dynamodb_stream_cqrs_pattern_2"
     })
-    
+
     //IAM roles and policies
     const lambda_service_aggregate_role = new Role(this, "lambda_service_aggregate_role", {
       assumedBy: new ServicePrincipal("lambda.amazonaws.com"),
@@ -243,10 +256,20 @@ export class DynamodbStreamCqrsStackPattern2 extends cdk.Stack {
 
     lambda_service_summary_put_role.addToPolicy(new PolicyStatement({
       resources: [dynamoTable_summary.tableArn],
-      actions: ['dynamodb:PutItem','dynamodb:UpdateItem'],
+      actions: ['dynamodb:PutItem', 'dynamodb:UpdateItem'],
     }));
 
     //Lambda functions
+    //Lambda layer
+    const embeded_metricsLayer = new LayerVersion(this, 'embeded_metricsLayer', {
+      layerVersionName: 'xray_sdk',
+      compatibleRuntimes: [
+        Runtime.PYTHON_3_7
+      ],
+      code: Code.fromAsset('resources/lambda_layer'),
+      description: 'xray_sdk_embeded_metrics',
+    });
+
     const lambda_aggregate = new Function(this, "lambda_aggregate", {
       runtime: Runtime.PYTHON_3_7,
       handler: "function_handler.lambda_handler",
@@ -255,7 +278,10 @@ export class DynamodbStreamCqrsStackPattern2 extends cdk.Stack {
       role: lambda_service_aggregate_role,
       environment: {
         'SQSQUEUE': queue.queueUrl
-      }
+      },
+      layers: [embeded_metricsLayer],
+      tracing: Tracing.ACTIVE,
+      insightsVersion: LambdaInsightsVersion.VERSION_1_0_98_0
     });
 
     lambda_aggregate.addEventSource(new DynamoEventSource(dynamoTable_details, {
@@ -273,7 +299,10 @@ export class DynamodbStreamCqrsStackPattern2 extends cdk.Stack {
       role: lambda_service_summary_put_role,
       environment: {
         'TABLENAME': dynamoTable_summary.tableName
-      }
+      },
+      layers: [embeded_metricsLayer],
+      tracing: Tracing.ACTIVE,
+      insightsVersion: LambdaInsightsVersion.VERSION_1_0_98_0
     });
 
     lambda_put.addEventSource(new SqsEventSource(queue));
@@ -321,18 +350,18 @@ export class DynamodbStreamCqrsStackPattern2 extends cdk.Stack {
               "city": {
                 "S": "$input.path('$.order.city')"
               },
-              'coffeetype': { 
-                'S': "$input.path('$.order.coffeetype')" 
+              'coffeetype': {
+                'S': "$input.path('$.order.coffeetype')"
               },
-              'coffeesize': { 
-                'S': "$input.path('$.order.coffeesize')" 
+              'coffeesize': {
+                'S': "$input.path('$.order.coffeesize')"
               },
-              'unitprice': { 
+              'unitprice': {
                 'N': "$input.path('$.order.unitprice')"
               },
-              'quantity': { 
+              'quantity': {
                 'N': "$input.path('$.order.quantity')"
-              }              
+              }
             }
           })
         },

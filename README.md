@@ -1,4 +1,5 @@
 ## Introducing the CQRS Pattern
+This is an example of a CQRS (command query response segregation) microservice pattern. This example also demonstrates using API Gateway mapping templates to directly update a DynamoDB table without invoking a Lambda function.
 
 CQRS is a Command Query Response Segregation pattern. This pattern separates read operations from update operations. The pattern is often used when read and update operations use different data modelsy. For example, the Account Details DynamoDB table would record each account transaction, while the Account Summary DynamoDB table would record a summary of transactions for each account.
 

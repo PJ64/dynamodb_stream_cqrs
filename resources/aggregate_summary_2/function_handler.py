@@ -4,6 +4,8 @@ import logging
 import os
 from decimal import Decimal
 from botocore.exceptions import ClientError
+from aws_xray_sdk.core import xray_recorder
+from aws_xray_sdk.core import patch_all
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
