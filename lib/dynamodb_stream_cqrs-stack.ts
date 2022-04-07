@@ -1,11 +1,12 @@
 import * as cdk from '@aws-cdk/core';
-import { AwsIntegration, RestApi, PassthroughBehavior, LogGroupLogDestination, AccessLogFormat, MethodLoggingLevel } from '@aws-cdk/aws-apigateway'
-import { Table, BillingMode, AttributeType, StreamViewType } from '@aws-cdk/aws-dynamodb'
+import { AwsIntegration, RestApi, PassthroughBehavior, LogGroupLogDestination, AccessLogFormat, MethodLoggingLevel } from '@aws-cdk/aws-apigateway';
+import { Table, BillingMode, AttributeType, StreamViewType } from '@aws-cdk/aws-dynamodb';
 import { Runtime, Code, Function, StartingPosition, LayerVersion, Tracing, LambdaInsightsVersion } from '@aws-cdk/aws-lambda';
-import { Queue } from '@aws-cdk/aws-sqs';
-import { Role, ServicePrincipal, ManagedPolicy, PolicyStatement } from '@aws-cdk/aws-iam';
-import { DynamoEventSource, SqsEventSource } from '@aws-cdk/aws-lambda-event-sources'
+import { Queue } from '@aws-cdk/aws-sqs'
+import { Role, ServicePrincipal, ManagedPolicy, PolicyStatement } from '@aws-cdk/aws-iam'
+import { DynamoEventSource, SqsEventSource } from '@aws-cdk/aws-lambda-event-sources';
 import { LogGroup } from '@aws-cdk/aws-logs';
+import { Duration } from '@aws-cdk/core/lib/duration';
 
 //Pattern 1
 export class DynamodbStreamCqrsStackPattern1 extends cdk.Stack {
@@ -226,7 +227,7 @@ export class DynamodbStreamCqrsStackPattern2 extends cdk.Stack {
       stream: StreamViewType.NEW_IMAGE,
       billingMode: BillingMode.PROVISIONED,
       readCapacity: 2,
-      writeCapacity: 2,
+      writeCapacity: 5,
     });
 
     //SQS queues
@@ -298,11 +299,13 @@ export class DynamodbStreamCqrsStackPattern2 extends cdk.Stack {
       functionName: "dynamodb_stream_cqrs_put_2",
       role: lambda_service_summary_put_role,
       environment: {
-        'TABLENAME': dynamoTable_summary.tableName
+        'TABLENAME': dynamoTable_summary.tableName,
+        'SQSQUEUE': queue.queueUrl
       },
       layers: [embeded_metricsLayer],
       tracing: Tracing.ACTIVE,
-      insightsVersion: LambdaInsightsVersion.VERSION_1_0_98_0
+      insightsVersion: LambdaInsightsVersion.VERSION_1_0_98_0,
+      
     });
 
     lambda_put.addEventSource(new SqsEventSource(queue));
